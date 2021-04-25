@@ -1,3 +1,13 @@
+//
+// server.c: A very, very simple web server
+//
+// To run:
+//  server <portnum (above 2000)>
+//
+// Repeatedly handles HTTP requests sent to this port number.
+// Most of the work is done within routines written in request.c
+//
+
 #include "helper.h"
 #include "request.h"
 
@@ -22,16 +32,6 @@ int use_ptr = 0;
 // Size of buffer
 int size = 0;
 
-//
-// server.c: A very, very simple web server
-//
-// To run:
-//  server <portnum (above 2000)>
-//
-// Repeatedly handles HTTP requests sent to this port number.
-// Most of the work is done within routines written in request.c
-//
-
 // CS537: Parse the new arguments too
 void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 {
@@ -45,6 +45,7 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
   *bufsize = atoi(argv[3]);
 }
 
+// Get the data at the next spot to read from
 int getfilled()
 {
   int connfd = buffer[use_ptr];
@@ -52,12 +53,14 @@ int getfilled()
   return connfd;
 }
 
+// Handle and close a new request connection
 int handle(int connfd)
 {
   requestHandle(connfd);
   close(connfd);
 }
 
+// Fill the buffer with the specified connfd
 void fillbuffer(int connfd)
 {
   buffer[fill_ptr] = connfd;
@@ -65,6 +68,7 @@ void fillbuffer(int connfd)
   numfull++;
 }
 
+// Worker function
 void *consumer(void *arg)
 {
   while (1)
@@ -96,14 +100,23 @@ int main(int argc, char *argv[])
   numempty = bufsize;
   size = bufsize;
 
+  // Create the specified number of workers
+  pthread_t workers[numthreads];
+  for (int i = 0; i < numthreads; i++)
+  {
+    pthread_create(&workers[i], NULL, consumer, NULL);
+  }
+
+  for (int i = 0; i < numthreads; ++i)
+  {
+    pthread_join(workers[i], NULL);
+  }
+
   //
   // CS537 (Part B): Create & initialize the shared memory region...
   //
 
-  //
-  // CS537 (Part A): Create some threads...
-  //
-
+  // Producer functionality
   listenfd = Open_listenfd(port);
   while (1)
   {
