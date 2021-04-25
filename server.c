@@ -1,7 +1,28 @@
 #include "helper.h"
 #include "request.h"
 
-// 
+// Global buffer userd by one producer and many consumers
+int *buffer;
+
+// Lock used with the condition variables
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+// Two condition variables: full and empty
+pthread_cond_t full = PTHREAD_COND_INITIALIZER;
+pthread_cond_t empty = PTHREAD_COND_INITIALIZER;
+
+// Number of full and number of emtpy slots in buffer
+int numempty = 0;
+int numfull = 0;
+
+// Fill and use pointers in buffer
+int fill_ptr = 0;
+int use_ptr = 0;
+
+// Size of buffer
+int size = 0;
+
+//
 // server.c: A very, very simple web server
 //
 // To run:
@@ -12,42 +33,87 @@
 //
 
 // CS537: Parse the new arguments too
-void getargs(int *port, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 {
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s <port>\n", argv[0]);
+  if (argc != 4)
+  {
+    fprintf(stderr, "Usage: %s <port> <threads> <buffers>\n", argv[0]);
     exit(1);
   }
   *port = atoi(argv[1]);
+  *numthreads = atoi(argv[2]);
+  *bufsize = atoi(argv[3]);
 }
 
+int getfilled()
+{
+  int connfd = buffer[use_ptr];
+  use_ptr = (use_ptr + 1) % size;
+  return connfd;
+}
+
+int handle(int connfd)
+{
+  requestHandle(connfd);
+  close(connfd);
+}
+
+void fillbuffer(int connfd)
+{
+  buffer[fill_ptr] = connfd;
+  fill_ptr = (fill_ptr + 1) % size;
+  numfull++;
+}
+
+void *consumer(void *arg)
+{
+  while (1)
+  {
+    pthread_mutex_lock(&mutex);
+    while (numfull == 0)
+      pthread_cond_wait(&full, &mutex);
+    int connfd = getfilled();
+    pthread_mutex_unlock(&mutex);
+    handle(connfd);
+    pthread_mutex_lock(&mutex);
+    numempty++;
+    pthread_cond_signal(&empty);
+    pthread_mutex_unlock(&mutex);
+  }
+}
 
 int main(int argc, char *argv[])
 {
   int listenfd, connfd, port, clientlen;
+  int numthreads;
+  int bufsize;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, argc, argv);
+  getargs(&port, &numthreads, &bufsize, argc, argv);
+
+  // Create a buffer of specified size
+  buffer = malloc(sizeof(int) * bufsize);
+  numempty = bufsize;
+  size = bufsize;
 
   //
   // CS537 (Part B): Create & initialize the shared memory region...
   //
 
-  // 
+  //
   // CS537 (Part A): Create some threads...
   //
 
   listenfd = Open_listenfd(port);
-  while (1) {
+  while (1)
+  {
     clientlen = sizeof(clientaddr);
-    connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *) &clientlen);
-
-    // 
-    // CS537 (Part A): In general, don't handle the request in the main thread.
-    // Save the relevant info in a buffer and have one of the worker threads 
-    // do the work. Also let the worker thread close the connection.
-    // 
-    requestHandle(connfd);
-    Close(connfd);
+    connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *)&clientlen);
+    pthread_mutex_lock(&mutex);
+    while (numempty == 0)
+      pthread_cond_wait(&empty, &mutex);
+    fillbuffer(connfd);
+    pthread_cond_signal(&full);
+    pthread_mutex_unlock(&mutex);
   }
 }
