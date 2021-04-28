@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
   int listenfd, connfd, port, clientlen;
   int numthreads;
   int bufsize;
-  char *shm_name;
+  char *shm_name = NULL;
   struct sockaddr_in clientaddr;
 
   getargs(&port, &numthreads, &bufsize, shm_name, argc, argv);
