@@ -10,6 +10,7 @@
 
 #include "helper.h"
 #include "request.h"
+#include <sys/mman.h>
 
 // Shared Memory Struct
 typedef struct
