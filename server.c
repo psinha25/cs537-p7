@@ -115,6 +115,8 @@ int main(int argc, char *argv[])
   numempty = bufsize;
   size = bufsize;
 
+  printf("Just created the buffer and set some global variables!\n");
+
   // Create the specified number of workers
   pthread_t workers[numthreads];
   for (int i = 0; i < numthreads; i++)
