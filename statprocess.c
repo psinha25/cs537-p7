@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
     int sleeptime = atoi(argv[2]);
     int num_threads = atoi(argv[3]);
 
-    printf("shm_name: %s, sleeptime_ms: %i, num_threads: %i", shm_name, sleeptime, num_threads);
-
     int shmfd = shm_open(shm_name, O_RDWR, 0660);
     if (shmfd < 0)
     {
@@ -34,5 +32,20 @@ int main(int argc, char *argv[])
     {
         perror("mmap() failed\n");
         exit(1);
+    }
+
+    int counter = 1;
+    while (1)
+    {
+        sleep(sleeptime / 1000);
+        printf("\n%d", counter);
+        for (int i = 0; i < num_threads; i++)
+        {
+            prinft("\n%lu : %d %d %d",
+                   shm_ptr[i].TID,
+                   shm_ptr[i].requests,
+                   shm_ptr[i].static_req,
+                   shm_ptr[i].dynamic_req);
+        }
     }
 }
