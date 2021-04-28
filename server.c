@@ -32,8 +32,17 @@ int use_ptr = 0;
 // Size of buffer
 int size = 0;
 
+// Shared Memory Struct
+typedef struct
+{
+  int TID;
+  int requests;
+  int static_req;
+  int dynamic_req;
+} slot_t;
+
 // CS537: Parse the new arguments too
-void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc, char *argv[])
 {
   if (argc != 5)
   {
@@ -54,6 +63,9 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
   *bufsize = atoi(argv[3]);
   if (*bufsize <= 0)
     exit(1);
+
+  shm_name = malloc(sizeof(argv[4]));
+  strcpy(shm_name, argv[4]);
 }
 
 // Get the data at the next spot to read from
@@ -105,27 +117,77 @@ void *consumer(void *arg)
   }
 }
 
+// SIGINT Handle
+static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
+{
+  printf("Captured signal %d\n", sig);
+  printf("Terminating...\n");
+
+  // Unmap
+  int ret = munmap(shm_ptr, pagesize);
+  if (ret != 0)
+  {
+    perror("munmap() failed\n");
+    free(shm_name);
+    exit(1);
+  }
+
+  // Delete the shared memory region
+  ret = shm_unlink(shm_name);
+  if (ret != 0)
+  {
+    perror("shm_unlink() failed\n");
+    free(shm_name);
+    exit(1);
+  }
+  free(shm_name);
+  exit(0);
+}
+
 int main(int argc, char *argv[])
 {
   int listenfd, connfd, port, clientlen;
   int numthreads;
   int bufsize;
+  char *shm_name;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, &numthreads, &bufsize, argc, argv);
+  getargs(&port, &numthreads, &bufsize, shm_name, argc, argv);
 
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
   numempty = bufsize;
   size = bufsize;
 
-  // Debug print statement
-  char *shm_name = argv[4];
-  printf("The shm_name is: %s\n", shm_name);
-
-  // Create and initialize shared memory
+  printf("This is shm_name: %s\n", shm_name);
+  free(shm_name;
   // int pagesize = getpagesize();
-  // int shmfd = shm_open(O_RDWR | O_CREAT, 0660);
+
+  // // Create the shared memory
+  // int shmfd = shm_open(shm_name, O_RDWR | O_CREAT, 0660);
+  // if (shmfd < 0)
+  // {
+  //   perror("shm_open() failed\n");
+  //   exit(1);
+  // }
+
+  // // Extend its size.
+  // int ret = ftruncate(shmfd, pagesize);
+  // if (ret != 0)
+  // {
+  //   perror("ftruncate() failed\n");
+  //   exit(1);
+  // }
+
+  // slot_t *shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+  // if (shm_ptr == MAP_FAILED)
+  // {
+  //   perror("mmap() failed\n");
+  //   exit(1);
+  // }
+
+  // // Register our SIGINT handler
+  // signal(SIGINT, handle_sigint);
 
   // Create the specified number of workers
   pthread_t workers[numthreads];
