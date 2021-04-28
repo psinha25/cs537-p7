@@ -54,7 +54,7 @@ int getfilled()
 }
 
 // Handle and close a new request connection
-int handle(int connfd)
+void handle(int connfd)
 {
   requestHandle(connfd);
   close(connfd);
