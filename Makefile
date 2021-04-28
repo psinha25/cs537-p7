@@ -21,7 +21,7 @@ client: $(CLIENT_OBJS)
 	$(CC) $(CFLAGS) -o client $(CLIENT_OBJS) $(LIBS)
 
 stat_process: 
-	$(CC) $(CFLAGS) -o stat_process statprocess.c $(LIBS)
+	$(CC) -c $(CFLAGS) -o stat_process statprocess.c
 
 output.cgi: output.c
 	$(CC) $(CFLAGS) -o output.cgi output.c
