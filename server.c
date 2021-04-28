@@ -33,7 +33,7 @@ int use_ptr = 0;
 int size = 0;
 
 // CS537: Parse the new arguments too
-void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 {
   if (argc != 5)
   {
@@ -54,8 +54,6 @@ void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc,
   *bufsize = atoi(argv[3]);
   if (*bufsize <= 0)
     exit(1);
-
-  strcpy(shm_name, argv[4]);
 }
 
 // Get the data at the next spot to read from
@@ -112,10 +110,9 @@ int main(int argc, char *argv[])
   int listenfd, connfd, port, clientlen;
   int numthreads;
   int bufsize;
-  char *shm_name;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, &numthreads, &bufsize, shm_name, argc, argv);
+  getargs(&port, &numthreads, &bufsize, argc, argv);
 
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
@@ -123,6 +120,7 @@ int main(int argc, char *argv[])
   size = bufsize;
 
   // Debug print statement
+  char *shm_name = argv[4];
   printf("The shm_name is: %s\n", shm_name);
 
   // Create and initialize shared memory
