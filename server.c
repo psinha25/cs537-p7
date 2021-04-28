@@ -90,10 +90,14 @@ int getfilled()
 // Handle and close a new request connection
 void handle(int connfd, slot_t *slot)
 {
-  requestHandle(connfd);
+  int content = requestHandle(connfd);
   // printf("requestHandle() returned!\n\n");
   close(connfd);
   slot->requests++;
+  if (content == 2)
+    slot->static_req++;
+  else if (content == 3)
+    slot->dynamic_req++;
   // printf("close() returned!\n\n");
 }
 
