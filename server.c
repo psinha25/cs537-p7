@@ -131,10 +131,9 @@ int main(int argc, char *argv[])
   //
 
   // Producer functionality
-  // listenfd = Open_listenfd(port);
+  listenfd = Open_listenfd(port);
   while (1)
   {
-    listenfd = Open_listenfd(port);
     clientlen = sizeof(clientaddr);
     connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *)&clientlen);
     // printf("Accept() returned, seemed to work!\n");
