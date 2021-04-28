@@ -64,7 +64,7 @@ void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc,
   if (*bufsize <= 0)
     exit(1);
 
-  shm_name = malloc(sizeof(argv[4]));
+  shm_name = malloc(sizeof(char) * strlen(argv[4]));
   strcpy(shm_name, argv[4]);
 }
 
