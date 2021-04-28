@@ -3,7 +3,6 @@
 # To remove files, type "make clean"
 #
 SERVER_OBJS = server.o request.o helper.o
-STAT_PROC_OBJS = stat_process.o
 CLIENT_OBJS = client.o helper.o
 
 CC = gcc
@@ -21,8 +20,8 @@ server: $(SERVER_OBJS)
 client: $(CLIENT_OBJS)
 	$(CC) $(CFLAGS) -o client $(CLIENT_OBJS) $(LIBS)
 
-stat_process: $(STAT_PROC_OBJS)
-	$(CC) $(CFLAGS) -o stat_process $(STAT_PROC_OBJS) $(LIBS)
+stat_process: 
+	$(CC) $(CFLAGS) -o stat_process $(LIBS)
 
 output.cgi: output.c
 	$(CC) $(CFLAGS) -o output.cgi output.c
@@ -31,4 +30,4 @@ output.cgi: output.c
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) $(STAT_PROC_OBJS) server client output.cgi stat_process
+	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) server client output.cgi stat_process
