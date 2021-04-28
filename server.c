@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
   printf("The shm_name is: %s\n", shm_name);
 
   // Create and initialize shared memory
-  int pagesize = getpagesize();
+  // int pagesize = getpagesize();
   // int shmfd = shm_open(O_RDWR | O_CREAT, 0660);
 
   // Create the specified number of workers
