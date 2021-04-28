@@ -68,7 +68,9 @@ int getfilled()
 void handle(int connfd)
 {
   requestHandle(connfd);
+  printf("requestHandle() returned!\n");
   close(connfd);
+  printf("close() returned!\n");
 }
 
 // Fill the buffer with the specified connfd
@@ -119,11 +121,13 @@ int main(int argc, char *argv[])
   {
     pthread_create(&workers[i], NULL, consumer, NULL);
   }
+  printf("Created the specified number of workers!\n");
 
   for (int i = 0; i < numthreads; ++i)
   {
     pthread_join(workers[i], NULL);
   }
+  printf("Joined all the workers!\n");
 
   //
   // CS537 (Part B): Create & initialize the shared memory region...
@@ -131,10 +135,12 @@ int main(int argc, char *argv[])
 
   // Producer functionality
   listenfd = Open_listenfd(port);
+  printf("Open_listenfd() seemed to work!\n");
   while (1)
   {
     clientlen = sizeof(clientaddr);
     connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *)&clientlen);
+    printf("Accept() returned, seemed to work!\n");
     pthread_mutex_lock(&mutex);
     while (numempty == 0)
       pthread_cond_wait(&empty, &mutex);
