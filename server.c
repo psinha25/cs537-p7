@@ -62,6 +62,7 @@ int getfilled()
   // printf("Use pointer is: %d\n\n", use_ptr);
   int connfd = buffer[use_ptr];
   use_ptr = (use_ptr + 1) % size;
+  numfull--;
   // printf("Connfd gotten from buffer is: %d\n\n", connfd);
   return connfd;
 }
@@ -99,7 +100,6 @@ void *consumer(void *arg)
     handle(connfd);
     pthread_mutex_lock(&mutex);
     numempty++;
-    numfull--;
     pthread_cond_signal(&empty);
     pthread_mutex_unlock(&mutex);
   }
