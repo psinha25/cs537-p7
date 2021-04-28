@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
   size = bufsize;
 
   printf("This is shm_name: %s\n", shm_name);
-  free(shm_name;
+  free(shm_name);
   // int pagesize = getpagesize();
 
   // // Create the shared memory
