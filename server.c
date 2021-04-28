@@ -40,9 +40,20 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
     fprintf(stderr, "Usage: %s <port> <threads> <buffers> <shm_name>\n", argv[0]);
     exit(1);
   }
+
+  // Port number
   *port = atoi(argv[1]);
+  if (*port <= 0 || *port == 22)
+    exit(1);
+
+  // Number of user threads
   *numthreads = atoi(argv[2]);
+  if (*numthreads <= 0)
+    exit(1);
+
   *bufsize = atoi(argv[3]);
+  if (*bufsize <= 0)
+    exit(1);
 }
 
 // Get the data at the next spot to read from
