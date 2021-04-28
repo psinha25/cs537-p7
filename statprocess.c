@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
         printf("\n%d", counter);
         for (int i = 0; i < num_threads; i++)
         {
-            prinft("\n%lu : %d %d %d",
+            printf("\n%lu : %d %d %d",
                    shm_ptr[i].TID,
                    shm_ptr[i].requests,
                    shm_ptr[i].static_req,
