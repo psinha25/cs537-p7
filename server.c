@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
   numempty = bufsize;
   size = bufsize;
 
+  // Debug print statement
   printf("The shm_name is: %s\n", shm_name);
 
   // Create and initialize shared memory
