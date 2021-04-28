@@ -59,10 +59,10 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 // Get the data at the next spot to read from
 int getfilled()
 {
-  printf("Use pointer is: %d\n\n", use_ptr);
+  // printf("Use pointer is: %d\n\n", use_ptr);
   int connfd = buffer[use_ptr];
   use_ptr = (use_ptr + 1) % size;
-  printf("Connfd gotten from buffer is: %d\n\n", connfd);
+  // printf("Connfd gotten from buffer is: %d\n\n", connfd);
   return connfd;
 }
 
@@ -70,15 +70,15 @@ int getfilled()
 void handle(int connfd)
 {
   requestHandle(connfd);
-  printf("requestHandle() returned!\n\n");
+  // printf("requestHandle() returned!\n\n");
   close(connfd);
-  printf("close() returned!\n\n");
+  // printf("close() returned!\n\n");
 }
 
 // Fill the buffer with the specified connfd
 void fillbuffer(int connfd)
 {
-  printf("Fill pointer is: %d\n\n", fill_ptr);
+  // printf("Fill pointer is: %d\n\n", fill_ptr);
   buffer[fill_ptr] = connfd;
   fill_ptr = (fill_ptr + 1) % size;
   numfull++;
@@ -125,7 +125,6 @@ int main(int argc, char *argv[])
   {
     pthread_create(&workers[i], NULL, consumer, NULL);
   }
-  printf("Created the specified number of workers!\n");
 
   //
   // CS537 (Part B): Create & initialize the shared memory region...
@@ -133,12 +132,11 @@ int main(int argc, char *argv[])
 
   // Producer functionality
   listenfd = Open_listenfd(port);
-  printf("Open_listenfd() seemed to work!\n");
   while (1)
   {
     clientlen = sizeof(clientaddr);
     connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *)&clientlen);
-    printf("Accept() returned, seemed to work!\n");
+    // printf("Accept() returned, seemed to work!\n");
     pthread_mutex_lock(&mutex);
     while (numempty == 0)
       pthread_cond_wait(&empty, &mutex);
