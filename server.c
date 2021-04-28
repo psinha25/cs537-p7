@@ -118,31 +118,31 @@ void *consumer(void *arg)
 }
 
 // SIGINT Handle
-static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
-{
-  printf("Captured signal %d\n", sig);
-  printf("Terminating...\n");
+// static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
+// {
+//   printf("Captured signal %d\n", sig);
+//   printf("Terminating...\n");
 
-  // Unmap
-  int ret = munmap(shm_ptr, pagesize);
-  if (ret != 0)
-  {
-    perror("munmap() failed\n");
-    free(shm_name);
-    exit(1);
-  }
+//   // Unmap
+//   int ret = munmap(shm_ptr, pagesize);
+//   if (ret != 0)
+//   {
+//     perror("munmap() failed\n");
+//     free(shm_name);
+//     exit(1);
+//   }
 
-  // Delete the shared memory region
-  ret = shm_unlink(shm_name);
-  if (ret != 0)
-  {
-    perror("shm_unlink() failed\n");
-    free(shm_name);
-    exit(1);
-  }
-  free(shm_name);
-  exit(0);
-}
+//   // Delete the shared memory region
+//   ret = shm_unlink(shm_name);
+//   if (ret != 0)
+//   {
+//     perror("shm_unlink() failed\n");
+//     free(shm_name);
+//     exit(1);
+//   }
+//   free(shm_name);
+//   exit(0);
+// }
 
 int main(int argc, char *argv[])
 {
