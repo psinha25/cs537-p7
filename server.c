@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
 
   getargs(&port, &numthreads, &bufsize, argc, argv);
 
+  print("Port: %d, NumThreads: %d, BufSize: %d\n", port, numthreads, bufsize);
+
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
   numempty = bufsize;
