@@ -125,11 +125,11 @@ int main(int argc, char *argv[])
   }
   printf("Created the specified number of workers!\n");
 
-  for (int i = 0; i < numthreads; ++i)
-  {
-    pthread_join(workers[i], NULL);
-  }
-  printf("Joined all the workers!\n");
+  // for (int i = 0; i < numthreads; ++i)
+  // {
+  //   pthread_join(workers[i], NULL);
+  // }
+  // printf("Joined all the workers!\n");
 
   //
   // CS537 (Part B): Create & initialize the shared memory region...
