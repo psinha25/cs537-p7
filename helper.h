@@ -50,7 +50,7 @@ typedef struct
 // Shared Memory Struct
 typedef struct
 {
-  int TID;
+  unsigned long TID;
   int requests;
   int static_req;
   int dynamic_req;
