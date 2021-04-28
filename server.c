@@ -114,29 +114,29 @@ void *consumer(void *arg)
   }
 }
 
-// SIGINT Handle
-// static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
-// {
-//   printf("Captured signal %d\n", sig);
-//   printf("Terminating...\n");
+// SIGINT Handler
+static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
+{
+  printf("Captured signal %d\n", sig);
+  printf("Terminating...\n");
 
-//   // Unmap
-//   int ret = munmap(shm_ptr, pagesize);
-//   if (ret != 0)
-//   {
-//     perror("munmap() failed\n");
-//     exit(1);
-//   }
+  // Unmap
+  int ret = munmap(shm_ptr, pagesize);
+  if (ret != 0)
+  {
+    perror("munmap() failed\n");
+    exit(1);
+  }
 
-//   // Delete the shared memory region
-//   ret = shm_unlink(shm_name);
-//   if (ret != 0)
-//   {
-//     perror("shm_unlink() failed\n");
-//     exit(1);
-//   }
-//   exit(0);
-// }
+  // Delete the shared memory region
+  ret = shm_unlink(shm_name);
+  if (ret != 0)
+  {
+    perror("shm_unlink() failed\n");
+    exit(1);
+  }
+  exit(0);
+}
 
 int main(int argc, char *argv[])
 {
@@ -153,34 +153,33 @@ int main(int argc, char *argv[])
   size = bufsize;
 
   char *shm_name = argv[4];
-  print("The shm_name is: %s\n", shm_name);
-  // int pagesize = getpagesize();
+  int pagesize = getpagesize();
 
-  // // Create the shared memory
-  // int shmfd = shm_open(shm_name, O_RDWR | O_CREAT, 0660);
-  // if (shmfd < 0)
-  // {
-  //   perror("shm_open() failed\n");
-  //   exit(1);
-  // }
+  // Create the shared memory
+  int shmfd = shm_open(shm_name, O_RDWR | O_CREAT, 0660);
+  if (shmfd < 0)
+  {
+    perror("shm_open() failed\n");
+    exit(1);
+  }
 
-  // // Extend its size.
-  // int ret = ftruncate(shmfd, pagesize);
-  // if (ret != 0)
-  // {
-  //   perror("ftruncate() failed\n");
-  //   exit(1);
-  // }
+  // Extend its size.
+  int ret = ftruncate(shmfd, pagesize);
+  if (ret != 0)
+  {
+    perror("ftruncate() failed\n");
+    exit(1);
+  }
 
-  // slot_t *shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
-  // if (shm_ptr == MAP_FAILED)
-  // {
-  //   perror("mmap() failed\n");
-  //   exit(1);
-  // }
+  slot_t *shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+  if (shm_ptr == MAP_FAILED)
+  {
+    perror("mmap() failed\n");
+    exit(1);
+  }
 
-  // // Register our SIGINT handler
-  // signal(SIGINT, handle_sigint);
+  // Register our SIGINT handler
+  signal(SIGINT, handle_sigint);
 
   // Create the specified number of workers
   pthread_t workers[numthreads];
