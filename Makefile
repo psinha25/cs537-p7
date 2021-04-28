@@ -31,4 +31,4 @@ stat_process: $(STAT_PROC_OBJS)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 clean:
-	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) $(STAT_PROC_OJBS) server client output.cgi stat_process
+	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) $(STAT_PROC_OBJS) server client output.cgi stat_process
