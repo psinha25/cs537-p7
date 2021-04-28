@@ -59,8 +59,10 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 // Get the data at the next spot to read from
 int getfilled()
 {
+  printf("Use pointer is: %d\n\n", use_ptr);
   int connfd = buffer[use_ptr];
   use_ptr = (use_ptr + 1) % size;
+  printf("Connfd gotten from buffer is: %d\n\n", connfd);
   return connfd;
 }
 
@@ -68,14 +70,15 @@ int getfilled()
 void handle(int connfd)
 {
   requestHandle(connfd);
-  printf("requestHandle() returned!\n");
+  printf("requestHandle() returned!\n\n");
   close(connfd);
-  printf("close() returned!\n");
+  printf("close() returned!\n\n");
 }
 
 // Fill the buffer with the specified connfd
 void fillbuffer(int connfd)
 {
+  printf("Fill pointer is: %d\n\n", fill_ptr);
   buffer[fill_ptr] = connfd;
   fill_ptr = (fill_ptr + 1) % size;
   numfull++;
@@ -108,14 +111,10 @@ int main(int argc, char *argv[])
 
   getargs(&port, &numthreads, &bufsize, argc, argv);
 
-  printf("Port: %d, NumThreads: %d, BufSize: %d\n", port, numthreads, bufsize);
-
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
   numempty = bufsize;
   size = bufsize;
-
-  printf("Just created the buffer and set some global variables!\n");
 
   // Create the specified number of workers
   pthread_t workers[numthreads];
@@ -124,12 +123,6 @@ int main(int argc, char *argv[])
     pthread_create(&workers[i], NULL, consumer, NULL);
   }
   printf("Created the specified number of workers!\n");
-
-  // for (int i = 0; i < numthreads; ++i)
-  // {
-  //   pthread_join(workers[i], NULL);
-  // }
-  // printf("Joined all the workers!\n");
 
   //
   // CS537 (Part B): Create & initialize the shared memory region...
