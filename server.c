@@ -18,15 +18,6 @@
 #include <sys/mman.h>
 #include <signal.h>
 
-// Shared Memory Struct
-typedef struct
-{
-  int TID;
-  int requests;
-  int static_req;
-  int dynamic_req;
-} slot_t;
-
 // Global buffer userd by one producer and many consumers
 int *buffer;
 
@@ -194,7 +185,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+  shm_ptr = (slot_t *)mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
   if (shm_ptr == MAP_FAILED)
   {
     perror("mmap() failed\n");
