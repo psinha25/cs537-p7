@@ -11,6 +11,15 @@
 #include "helper.h"
 #include "request.h"
 
+// Shared Memory Struct
+typedef struct
+{
+  int TID;
+  int requests;
+  int static_req;
+  int dynamic_req;
+} slot_t;
+
 // Global buffer userd by one producer and many consumers
 int *buffer;
 
@@ -32,14 +41,9 @@ int use_ptr = 0;
 // Size of buffer
 int size = 0;
 
-// Shared Memory Struct
-typedef struct
-{
-  int TID;
-  int requests;
-  int static_req;
-  int dynamic_req;
-} slot_t;
+slot_t *shm_ptr;
+int pagesize;
+char *shm_name;
 
 // CS537: Parse the new arguments too
 void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
@@ -115,7 +119,7 @@ void *consumer(void *arg)
 }
 
 // SIGINT Handler
-static void handle_sigint(int sig, slot_t *shm_ptr, int pagesize, char *shm_name)
+static void handle_sigint(int sig)
 {
   printf("Captured signal %d\n", sig);
   printf("Terminating...\n");
@@ -152,8 +156,8 @@ int main(int argc, char *argv[])
   numempty = bufsize;
   size = bufsize;
 
-  char *shm_name = argv[4];
-  int pagesize = getpagesize();
+  shm_name = argv[4];
+  pagesize = getpagesize();
 
   // Create the shared memory
   int shmfd = shm_open(shm_name, O_RDWR | O_CREAT, 0660);
@@ -171,7 +175,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  slot_t *shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
+  shm_ptr = mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
   if (shm_ptr == MAP_FAILED)
   {
     perror("mmap() failed\n");
