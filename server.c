@@ -35,9 +35,9 @@ int size = 0;
 // CS537: Parse the new arguments too
 void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 {
-  if (argc != 4)
+  if (argc != 5)
   {
-    fprintf(stderr, "Usage: %s <port> <threads> <buffers>\n", argv[0]);
+    fprintf(stderr, "Usage: %s <port> <threads> <buffers> <shm_name>\n", argv[0]);
     exit(1);
   }
   *port = atoi(argv[1]);
