@@ -16,7 +16,11 @@ int main(int argc, char *argv[])
 
     char *shm_name = argv[1];
     int sleeptime = atoi(argv[2]);
+    if (sleeptime <= 0)
+        exit(1);
     int num_threads = atoi(argv[3]);
+    if (num_threads <= 0)
+        exit(1);
 
     int shmfd = shm_open(shm_name, O_RDWR, 0660);
     if (shmfd < 0)
