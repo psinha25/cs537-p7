@@ -2,7 +2,7 @@
 # To compile, type "make" or make "all"
 # To remove files, type "make clean"
 #
-SERVER_OBJS = server.o request.o helper.o stat_process.o
+SERVER_OBJS = server.o request.o helper.o
 CLIENT_OBJS = client.o helper.o
 
 CC = gcc
@@ -22,6 +22,9 @@ client: $(CLIENT_OBJS)
 
 output.cgi: output.c
 	$(CC) $(CFLAGS) -o output.cgi output.c
+
+stat_process: stat_process.c
+	$(CC) $(CFLAGS) -o stat_process stat_process.c
 
 .c.o:
 	$(CC) $(CFLAGS) -o $@ -c $<
