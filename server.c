@@ -33,7 +33,7 @@ int use_ptr = 0;
 int size = 0;
 
 // CS537: Parse the new arguments too
-void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc, char *argv[])
 {
   if (argc != 5)
   {
@@ -54,6 +54,8 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
   *bufsize = atoi(argv[3]);
   if (*bufsize <= 0)
     exit(1);
+
+  strcpy(shm_name, argv[4]);
 }
 
 // Get the data at the next spot to read from
@@ -110,14 +112,21 @@ int main(int argc, char *argv[])
   int listenfd, connfd, port, clientlen;
   int numthreads;
   int bufsize;
+  char *shm_name;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, &numthreads, &bufsize, argc, argv);
+  getargs(&port, &numthreads, &bufsize, shm_name, argc, argv);
 
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
   numempty = bufsize;
   size = bufsize;
+
+  printf("The shm_name is: %s\n", shm_name);
+
+  // Create and initialize shared memory
+  int pagesize = getpagesize();
+  // int shmfd = shm_open(O_RDWR | O_CREAT, 0660);
 
   // Create the specified number of workers
   pthread_t workers[numthreads];
@@ -125,10 +134,6 @@ int main(int argc, char *argv[])
   {
     pthread_create(&workers[i], NULL, consumer, NULL);
   }
-
-  //
-  // CS537 (Part B): Create & initialize the shared memory region...
-  //
 
   // Producer functionality
   listenfd = Open_listenfd(port);
