@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
   numempty = bufsize;
   size = bufsize;
 
-  printf("This is shm_name: %s\n", shm_name);
+  printf("This is shm_name: %s\n", *shm_name);
   free(shm_name);
   // int pagesize = getpagesize();
 
