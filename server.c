@@ -10,7 +10,13 @@
 
 #include "helper.h"
 #include "request.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/mman.h>
+#include <signal.h>
 
 // Shared Memory Struct
 typedef struct

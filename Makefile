@@ -6,7 +6,7 @@ SERVER_OBJS = server.o request.o helper.o
 CLIENT_OBJS = client.o helper.o
 
 CC = gcc
-CFLAGS = -g -Werror -Wall -Wno-format-overflow -Wno-restrict
+CFLAGS = -g -Werror -Wall -Wno-format-overflow -Wno-restrict -lrt
 
 LIBS = -lpthread 
 
