@@ -82,6 +82,8 @@ void fillbuffer(int connfd)
   buffer[fill_ptr] = connfd;
   fill_ptr = (fill_ptr + 1) % size;
   numfull++;
+  // Potential fix
+  numempty--;
 }
 
 // Worker function
@@ -97,6 +99,7 @@ void *consumer(void *arg)
     handle(connfd);
     pthread_mutex_lock(&mutex);
     numempty++;
+    numfull--;
     pthread_cond_signal(&empty);
     pthread_mutex_unlock(&mutex);
   }
