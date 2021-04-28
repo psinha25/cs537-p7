@@ -42,7 +42,7 @@ typedef struct
 } slot_t;
 
 // CS537: Parse the new arguments too
-void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
 {
   if (argc != 5)
   {
@@ -63,9 +63,6 @@ void getargs(int *port, int *numthreads, int *bufsize, char *shm_name, int argc,
   *bufsize = atoi(argv[3]);
   if (*bufsize <= 0)
     exit(1);
-
-  shm_name = malloc(sizeof(char) * strlen(argv[4]));
-  strcpy(shm_name, argv[4]);
 }
 
 // Get the data at the next spot to read from
@@ -128,7 +125,6 @@ void *consumer(void *arg)
 //   if (ret != 0)
 //   {
 //     perror("munmap() failed\n");
-//     free(shm_name);
 //     exit(1);
 //   }
 
@@ -137,10 +133,8 @@ void *consumer(void *arg)
 //   if (ret != 0)
 //   {
 //     perror("shm_unlink() failed\n");
-//     free(shm_name);
 //     exit(1);
 //   }
-//   free(shm_name);
 //   exit(0);
 // }
 
@@ -149,18 +143,17 @@ int main(int argc, char *argv[])
   int listenfd, connfd, port, clientlen;
   int numthreads;
   int bufsize;
-  char *shm_name = NULL;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, &numthreads, &bufsize, shm_name, argc, argv);
+  getargs(&port, &numthreads, &bufsize, argc, argv);
 
   // Create a buffer of specified size
   buffer = malloc(sizeof(int) * bufsize);
   numempty = bufsize;
   size = bufsize;
 
-  printf("This is shm_name: %s\n", *shm_name);
-  free(shm_name);
+  char *shm_name = argv[4];
+  print("The shm_name is: %s\n", shm_name);
   // int pagesize = getpagesize();
 
   // // Create the shared memory
