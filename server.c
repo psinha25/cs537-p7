@@ -88,11 +88,12 @@ int getfilled()
 }
 
 // Handle and close a new request connection
-void handle(int connfd)
+void handle(int connfd, slot_t *slot)
 {
   requestHandle(connfd);
   // printf("requestHandle() returned!\n\n");
   close(connfd);
+  slot->requests++;
   // printf("close() returned!\n\n");
 }
 
@@ -110,6 +111,13 @@ void fillbuffer(int connfd)
 // Worker function
 void *consumer(void *arg)
 {
+  // Fill slot with TID data
+  // Do this once outside while loop
+  slot_t *slot = (slot_t *)arg;
+  if (slot != NULL)
+    slot->TID = pthread_self();
+
+  // Infinite loop for workers to handle requests
   while (1)
   {
     pthread_mutex_lock(&mutex);
@@ -117,7 +125,7 @@ void *consumer(void *arg)
       pthread_cond_wait(&full, &mutex);
     int connfd = getfilled();
     pthread_mutex_unlock(&mutex);
-    handle(connfd);
+    handle(connfd, slot);
     pthread_mutex_lock(&mutex);
     numempty++;
     pthread_cond_signal(&empty);
@@ -196,7 +204,7 @@ int main(int argc, char *argv[])
   pthread_t workers[numthreads];
   for (int i = 0; i < numthreads; i++)
   {
-    pthread_create(&workers[i], NULL, consumer, NULL);
+    pthread_create(&workers[i], NULL, consumer, (void *)(&shm_ptr[i]));
   }
 
   // Producer functionality
