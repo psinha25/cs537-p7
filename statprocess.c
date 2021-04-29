@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
     }
 
     char *shm_name = argv[1];
-    int sleeptime = atoi(argv[2]);
-    if (sleeptime <= 0)
+    int sleeptime_ms = atoi(argv[2]);
+    if (sleeptime_ms <= 0)
         exit(1);
     int num_threads = atoi(argv[3]);
     if (num_threads <= 0)
@@ -38,10 +38,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    int sleeptime_s = sleeptime_ms / 100;
+    int sleeptime_ns = (sleeptime_ms % 1000) * 1000000;
+    struct timespec sleeptime;
+    sleeptime.tv_sec = sleeptime_s;
+    sleeptime.tv_nsec = sleeptime_ns;
     int counter = 1;
     while (1)
     {
-        sleep(sleeptime / 1000);
+        nanosleep(&sleeptime, NULL);
         printf("\n%d", counter);
         for (int i = 0; i < num_threads; i++)
         {
@@ -51,5 +56,6 @@ int main(int argc, char *argv[])
                    shm_ptr[i].static_req,
                    shm_ptr[i].dynamic_req);
         }
+        counter++;
     }
 }
