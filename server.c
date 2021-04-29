@@ -84,11 +84,9 @@ void getargs(int *port, int *numthreads, int *bufsize, char **shm_name, int argc
 // Get the data at the next spot to read from
 int getfilled()
 {
-  // printf("Use pointer is: %d\n\n", use_ptr);
   int connfd = buffer[use_ptr];
   use_ptr = (use_ptr + 1) % size;
   numfull--;
-  // printf("Connfd gotten from buffer is: %d\n\n", connfd);
   return connfd;
 }
 
@@ -96,24 +94,20 @@ int getfilled()
 void handle(int connfd, slot_t *slot)
 {
   int content = requestHandle(connfd);
-  // printf("requestHandle() returned!\n\n");
   close(connfd);
   slot->requests++;
   if (content == 2)
     slot->static_req++;
   else if (content == 3)
     slot->dynamic_req++;
-  // printf("close() returned!\n\n");
 }
 
 // Fill the buffer with the specified connfd
 void fillbuffer(int connfd)
 {
-  // printf("Fill pointer is: %d\n\n", fill_ptr);
   buffer[fill_ptr] = connfd;
   fill_ptr = (fill_ptr + 1) % size;
   numfull++;
-  // Potential fix
   numempty--;
 }
 
@@ -172,7 +166,6 @@ int main(int argc, char *argv[])
 
   getargs(&port, &numthreads, &bufsize, &shm_name, argc, argv);
 
-  // shm_name = argv[4];
   pagesize = getpagesize();
 
   // Create the shared memory
