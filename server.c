@@ -39,12 +39,15 @@ int use_ptr = 0;
 // Size of buffer
 int size = 0;
 
+// Shared memory pointers
 slot_t *shm_ptr;
-int pagesize;
 char *shm_name;
 
+// Page size
+int pagesize;
+
 // CS537: Parse the new arguments too
-void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
+void getargs(int *port, int *numthreads, int *bufsize, char **shm_name, int argc, char *argv[])
 {
   if (argc != 5)
   {
@@ -55,16 +58,27 @@ void getargs(int *port, int *numthreads, int *bufsize, int argc, char *argv[])
   // Port number
   *port = atoi(argv[1]);
   if (*port <= 0 || *port == 22)
+  {
+    fprintf(stderr, "Port number must be greater than 0\n");
     exit(1);
+  }
 
   // Number of user threads
   *numthreads = atoi(argv[2]);
   if (*numthreads <= 0)
+  {
+    fprintf(stderr, "Number of threads must be greater than 0\n");
     exit(1);
+  }
 
   *bufsize = atoi(argv[3]);
   if (*bufsize <= 0)
+  {
+    fprintf(stderr, "Buffer size must be greater than 0\n");
     exit(1);
+  }
+
+  *shm_name = strdup(argv[4]);
 }
 
 // Get the data at the next spot to read from
@@ -131,14 +145,11 @@ void *consumer(void *arg)
 // SIGINT Handler
 static void handle_sigint(int sig)
 {
-  printf("Captured signal %d\n", sig);
-  printf("Terminating...\n");
-
   // Unmap
   int ret = munmap(shm_ptr, pagesize);
   if (ret != 0)
   {
-    perror("munmap() failed\n");
+    fprintf(stderr, "munmap() failed\n");
     exit(1);
   }
 
@@ -146,7 +157,7 @@ static void handle_sigint(int sig)
   ret = shm_unlink(shm_name);
   if (ret != 0)
   {
-    perror("shm_unlink() failed\n");
+    fprintf(stderr, "shm_unlink() failed\n");
     exit(1);
   }
   exit(0);
@@ -159,21 +170,16 @@ int main(int argc, char *argv[])
   int bufsize;
   struct sockaddr_in clientaddr;
 
-  getargs(&port, &numthreads, &bufsize, argc, argv);
+  getargs(&port, &numthreads, &bufsize, &shm_name, argc, argv);
 
-  // Create a buffer of specified size
-  buffer = malloc(sizeof(int) * bufsize);
-  numempty = bufsize;
-  size = bufsize;
-
-  shm_name = argv[4];
+  // shm_name = argv[4];
   pagesize = getpagesize();
 
   // Create the shared memory
   int shmfd = shm_open(shm_name, O_RDWR | O_CREAT, 0660);
   if (shmfd < 0)
   {
-    perror("shm_open() failed\n");
+    fprintf(stderr, "shm_open() failed\n");
     exit(1);
   }
 
@@ -181,19 +187,25 @@ int main(int argc, char *argv[])
   int ret = ftruncate(shmfd, pagesize);
   if (ret != 0)
   {
-    perror("ftruncate() failed\n");
+    fprintf(stderr, "ftruncate() failed\n");
     exit(1);
   }
 
+  // Map the shared memory
   shm_ptr = (slot_t *)mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
   if (shm_ptr == MAP_FAILED)
   {
-    perror("mmap() failed\n");
+    fprintf(stderr, "mmap() failed\n");
     exit(1);
   }
 
   // Register our SIGINT handler
   signal(SIGINT, handle_sigint);
+
+  // Create a buffer of specified size
+  buffer = malloc(sizeof(int) * bufsize);
+  numempty = bufsize;
+  size = bufsize;
 
   // Create the specified number of workers
   pthread_t workers[numthreads];
@@ -208,7 +220,7 @@ int main(int argc, char *argv[])
   {
     clientlen = sizeof(clientaddr);
     connfd = Accept(listenfd, (SA *)&clientaddr, (socklen_t *)&clientlen);
-    // printf("Accept() returned, seemed to work!\n");
+
     pthread_mutex_lock(&mutex);
     while (numempty == 0)
       pthread_cond_wait(&empty, &mutex);

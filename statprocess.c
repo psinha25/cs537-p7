@@ -8,41 +8,60 @@
 
 int main(int argc, char *argv[])
 {
+    // Check correct number of arguments
     if (argc != 4)
     {
-        fprintf(stderr, "Usage: %s <port> <threads> <buffers> <shm_name>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <shm_name> <sleeptime_ms> <num_threads>\n", argv[0]);
         exit(1);
     }
 
-    char *shm_name = argv[1];
+    // Get shared memory name to read from
+    char *shm_name = strdup(argv[1]);
+    if (shm_name == NULL)
+    {
+        fprintf(stderr, "shm_name is NULL\n");
+        exit(1);
+    }
+
+    // Get milliseconds to sleep for
     int sleeptime_ms = atoi(argv[2]);
     if (sleeptime_ms <= 0)
+    {
+        fprintf(stderr, "sleeptime_ms must be greater than 0\n");
         exit(1);
+    }
+
+    // Get number of threads
     int num_threads = atoi(argv[3]);
     if (num_threads <= 0)
+    {
+        fprintf(stderr, "num_threads must be greater than 0\n");
         exit(1);
+    }
 
+    // Open shared memory
     int shmfd = shm_open(shm_name, O_RDWR, 0660);
     if (shmfd < 0)
     {
-        perror("shm_open() failed\n");
+        fprintf(stderr, "shm_open() failed\n");
         exit(1);
     }
 
     int pagesize = getpagesize();
 
+    // Map shared memory
     slot_t *shm_ptr = (slot_t *)mmap(NULL, pagesize, PROT_READ | PROT_WRITE, MAP_SHARED, shmfd, 0);
     if (shm_ptr == MAP_FAILED)
     {
-        perror("mmap() failed\n");
+        fprintf(stderr, "mmap() failed\n");
         exit(1);
     }
 
-    int sleeptime_s = sleeptime_ms / 100;
-    int sleeptime_ns = (sleeptime_ms % 1000) * 1000000;
+    // Populate timespec struct for nanosleep() system call
     struct timespec sleeptime;
-    sleeptime.tv_sec = sleeptime_s;
-    sleeptime.tv_nsec = sleeptime_ns;
+    sleeptime.tv_sec = sleeptime_ms / 100;
+    sleeptime.tv_nsec = (sleeptime_ms % 1000) * 1000000;
+
     int counter = 1;
     while (1)
     {
